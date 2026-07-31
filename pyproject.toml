@@ -1,0 +1,27 @@
+[tool.poetry]
+packages = [{include = "appvault", from = "src"}]
+
+[project]
+name = "appvault"
+version = "0.1.0"
+description = "CLI that syncs job-application status from your inbox and prioritizes follow-ups"
+authors = [{name = "Your Name", email = "you@example.com"}]
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml (>=6.0.3,<7.0.0)",
+    "click (>=8.4.2,<9.0.0)"
+]
+
+[project.scripts]
+appvault = "appvault.cli:cli"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = ["pytest (>=9.1.1,<10.0.0)"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
