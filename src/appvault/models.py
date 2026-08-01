@@ -30,3 +30,4 @@ class Application:
             raise ValueError("company cannot be empty")
         if not self.role or not self.role.strip():
             raise ValueError("role cannot be empty")
+
