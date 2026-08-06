@@ -4,7 +4,7 @@ from datetime import date, datetime
 from appvault.exceptions import StorageError
 from appvault.models import Application, ApplicationStatus
 from appvault.storage import ApplicationStore
-
+from appvault.duplicates import find_duplicates
 
 @click.group()
 @click.option("--storage-path", type=click.Path(), default=None)
@@ -24,6 +24,11 @@ def cli(ctx, storage_path):
 def add(ctx, company, role, applied_date, interest):
     """Add a new job application."""
     store = ctx.obj["store"]
+    dupes = find_duplicates(company, store.load_all())
+    if dupes:
+        best, score = dupes[0]
+        click.echo(f"Warning: '{company}' looks similar to existing  '{best.company}' - (similarity {score:.2f}, id = {best.application_id}). Adding anyway.")
+
     applied = applied_date.date() if applied_date else date.today()
     application = Application(
         company=company,
@@ -63,4 +68,3 @@ def set_status(ctx, application_id, new_status):
         click.echo(f"Error: {e}")
         return
     click.echo(f"Updated application [{application.company} - {application.role}] to {new_status}")
-    
