@@ -4,7 +4,7 @@ from datetime import date, datetime
 from appvault.models import Application, ApplicationStatus
 from pathlib import Path
 from typing import Optional
-from appvault.exceptions import StorageError
+from appvault.exceptions import StorageError, AppVaultError
 def _serialize(app:Application) -> dict:
     return {
         "company": app.company,
@@ -69,4 +69,13 @@ class ApplicationStore:
                 app.status = status
                 self.save_all(apps)
                 return app
+        raise StorageError(f"No application found with id {application_id}")
+
+    def delete(self, application_id: str) -> Application:
+        apps = self.load_all()
+        for i, app in enumerate(apps):
+            if app.application_id == application_id:
+                removed = apps.pop(i)
+                self.save_all(apps)
+                return removed
         raise StorageError(f"No application found with id {application_id}")

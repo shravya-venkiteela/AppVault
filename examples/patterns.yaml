@@ -1,0 +1,100 @@
+# AppVault email-matching pattern configuration.
+#
+# These patterns were migrated directly from the tested, verified hardcoded
+# version of parser.py -- every pattern here has already been validated
+# against real (anonymized) sample emails and covered by tests/test_parser.py.
+# Do not "clean up" or simplify a pattern without re-running the full test
+# suite; several of these were the site of real bugs (case-sensitivity
+# conflicts with [A-Z] under case-insensitive matching, missing commas,
+# empty alternations matching too broadly) found and fixed the hard way.
+#
+# Schema:
+#   offer / rejected / received / interview:
+#     list of { pattern: <regex string> } -- checked in this priority
+#     order (offer > rejected > interview > received) when detecting status.
+#     All match case-insensitively.
+#
+#   company_extraction / role_extraction:
+#     list of { pattern: <regex string> } -- each MUST contain exactly one
+#     capture group, which is what gets extracted. Patterns are tried in
+#     order; the first that matches wins. The literal keyword portions
+#     (e.g. "interest in") use inline (?i:...) case-insensitive groups
+#     deliberately -- do NOT wrap the whole pattern in a case-insensitive
+#     flag, since that defeats the [A-Za-z] character class's purpose as
+#     a sanity check (this exact bug shipped once already).
+#
+#   junk_company_names:
+#     flat list of lowercase strings. A matched company candidate whose
+#     lowercased form appears here is rejected (treated as if nothing
+#     matched), since these are common words a loose regex can mistake
+#     for a proper noun (e.g. "join us" matching "us" as a company).
+
+offer:
+  - pattern: "offer"
+  - pattern: "congratulations"
+  - pattern: "we are pleased to offer"
+  - pattern: "we are excited to offer"
+  - pattern: "we are thrilled to offer"
+  - pattern: "we are delighted to offer"
+  - pattern: "we are happy to offer"
+  - pattern: "we are pleased to extend an offer"
+  - pattern: "job offer"
+  - pattern: "offer letter"
+  - pattern: "review and accept the offer"
+  - pattern: "accept the offer"
+  - pattern: "you aced the interview"
+
+rejected:
+  - pattern: "regret"
+  - pattern: "unfortunately"
+  - pattern: "we are unable to offer"
+  - pattern: "we are unable to move forward"
+  - pattern: "we are unable to proceed"
+  - pattern: "we are unable to continue"
+  - pattern: "we are unable to advance"
+  - pattern: "we are unable to progress"
+  - pattern: "we are unable to take you further"
+  - pattern: "we are unable to take you forward"
+  - pattern: "we are unable to take you ahead"
+  - pattern: "we are unable to take you up"
+  - pattern: "not ideally suited"
+  - pattern: "not a good fit"
+  - pattern: "decided to move forward with other candidates"
+  - pattern: "decided to move forward with other applicants"
+  - pattern: "we (?:have decided|will not be) mov(?:ing|e) forward"
+
+received:
+  - pattern: "we(?:'ve|have) received your application"
+  - pattern: "thank you for (?:your interest|applying)\\b"
+
+interview:
+  # UNVALIDATED -- no real sample email was ever available for this
+  # category. Treat as a best guess, not a tested pattern set, until
+  # checked against a real interview-invite email.
+  - pattern: "schedule (?:a|your) interview"
+  - pattern: "interview invitation"
+  - pattern: "interview confirmation"
+  - pattern: "we(?:'d|would) like to (?:schedule|invite you for) an interview"
+
+company_extraction:
+  - pattern: "(?i:interest in )(?:the |joining |working at )?([A-Za-z][A-Za-z0-9&.,' ]{1,60}?)(?:\\s*-|\\s*!|\\s*,|\\s+for\\b|\\.\\s|\\n)"
+  - pattern: "(?i:join )(?:us at |)([A-Za-z][A-Za-z0-9&.,' ]{1,60}?)(?:\\s*[.!]|\\s*,|\\n)"
+
+role_extraction:
+  - pattern: "(?i:application for )(?:the )?([A-Za-z][A-Za-z0-9/&,' ]{1,80}?)(?:\\s*position\\b)?(?:\\s*\\(\\d+\\))?(?:\\s*[.,!]|\\s+and\\b|\\n)"
+  - pattern: "(?i:interest in the )[A-Za-z][A-Za-z0-9&.,' ]{1,60}?\\s*-\\s*([A-Za-z0-9&/,' ]{1,80}?)\\s*position\\b"
+
+junk_company_names:
+  - "us"
+  - "the"
+  - "our"
+  - "you"
+  - "your"
+  - "this"
+  - "that"
+  - "a"
+  - "an"
+  - "our team"
+  - "we"
+  - "it"
+  - "them"
