@@ -117,4 +117,4 @@ poetry run pytest
 
 To confirm this claim rather than take it on faith, disconnect from the internet and run the suite again; it should still pass fully green.
 
-See [Limitations.md](Limitations.md) for known gaps and simplifications.
+See [LIMITATIONS.md](LIMITATIONS.md) for known gaps and simplifications.
